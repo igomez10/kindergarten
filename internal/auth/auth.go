@@ -57,12 +57,34 @@ func DevAs(subject string) HeaderAuthenticator {
 }
 
 func (a HeaderAuthenticator) Authenticate(r *http.Request) (Identity, error) {
-	sub := strings.TrimSpace(r.Header.Get(a.SubjectHeader))
+	sub, err := single(r.Header, a.SubjectHeader)
+	if err != nil {
+		return Identity{}, err
+	}
+	email, err := single(r.Header, a.EmailHeader)
+	if err != nil {
+		return Identity{}, err
+	}
 	if sub == "" {
 		sub = a.DefaultSubject
 	}
 	if sub == "" {
 		return Identity{}, ErrUnauthenticated
 	}
-	return Identity{Issuer: a.Issuer, Subject: sub, Email: strings.TrimSpace(r.Header.Get(a.EmailHeader))}, nil
+	return Identity{Issuer: a.Issuer, Subject: sub, Email: email}, nil
+}
+
+// single returns a header that must appear at most once. A repeated or
+// comma-joined identity header means a client-sent copy reached the API next
+// to the proxy's (oauth2-proxy appends rather than replaces when told not to
+// strip), and either copy could be the forged one, so the request is refused.
+func single(h http.Header, name string) (string, error) {
+	values := h.Values(name)
+	if len(values) > 1 || (len(values) == 1 && strings.Contains(values[0], ",")) {
+		return "", ErrUnauthenticated
+	}
+	if len(values) == 0 {
+		return "", nil
+	}
+	return strings.TrimSpace(values[0]), nil
 }

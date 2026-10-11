@@ -52,7 +52,9 @@ jobs:
 
   build:
     needs: test
-    if: github.event_name != 'pull_request'
+    # Only main builds and promotes: a manual run on another branch would
+    # otherwise pin that branch's image into main.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -78,6 +80,11 @@ jobs:
           tags: |
             ${{ env.IMAGE }}:main
             ${{ env.IMAGE }}:${{ github.sha }}
+          # Links the GHCR package to this repo. A new package is still
+          # private: make it public once (package settings) so the cluster
+          # can pull without credentials.
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

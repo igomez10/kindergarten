@@ -1454,6 +1454,13 @@ What exists:
   127.0.0.1. `terraform/zitadel.tf` creates project `kindergarten` with role check,
   an OIDC web app and role `kindergarten-user`, plus grants from
   `var.zitadel_user_ids`. Invite-only; no open registration.
+  **Header stripping must stay on** (oauth2-proxy's default
+  `--skip-auth-strip-headers=true`). Tested with oauth2-proxy v7.15.5: with it
+  off, a signed-in user who sends `X-Forwarded-User: <victim sub>` reaches the
+  upstream as `victim-sub,<own sub>`, and a forged `X-Forwarded-Email` passes
+  untouched. The first copy is the forged one. The chart therefore keeps the
+  default, and the API refuses any repeated or comma-joined identity header
+  (`internal/auth`).
 - **Least-privilege RBAC** (`helm/kindergarten/templates/rbac.yaml`): neither
   component can read Secrets cluster-wide. Tenant bootstrap binds
   `kindergarten-tenant-secrets-reader` to both ServiceAccounts inside each tenant

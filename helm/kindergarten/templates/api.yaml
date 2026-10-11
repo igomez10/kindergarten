@@ -46,9 +46,11 @@ spec:
             - --cookie-expire=12h
             - --reverse-proxy=true
             # X-Forwarded-User (the ZITADEL sub) and -Email on every upstream
-            # request, overwriting anything the client sent.
+            # request. Client-sent copies are stripped first: that is the
+            # default --skip-auth-strip-headers=true, and it must stay on.
+            # Turned off, oauth2-proxy appends its value after the client's
+            # and the API would read the forged one.
             - --pass-user-headers=true
-            - --skip-auth-strip-headers=false
             - --silence-ping-logging=true
           env:
             - name: OAUTH2_PROXY_CLIENT_ID
