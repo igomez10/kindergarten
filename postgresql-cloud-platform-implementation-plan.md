@@ -1426,7 +1426,7 @@ Keep detailed Kubernetes failures in controller logs, but do not expose sensitiv
 
 A friend can register, log in, provision PostgreSQL, see readiness, obtain a connection string, connect, and delete the instance without Kubernetes access.
 
-### Phase 6 status: built and tested locally (2026-10-10). Deployment awaiting review
+### Phase 6 status: deployed (2026-10-11). End-to-end login test pending
 
 Nothing is committed, pushed or applied yet; the owner chose to review first.
 The cluster-side checks of this phase (ZITADEL login, the full flow behind the
@@ -1491,7 +1491,14 @@ merge infra `kindergarten` → `terraform apply` layer 10 `-target=module.cloudf
 - [x] Dashboard pages render with live data; cross-tenant ID hidden
 - [x] CSRF, auth-mode and loopback guards tested
 - [x] Image builds; Helm chart renders; cluster-scoped RBAC passes server dry-run; Terraform validates
-- [ ] Deployed via Argo CD and reachable at the dashboard hostname
+- [x] Deployed via Argo CD and reachable at the dashboard hostname. 2026-10-11:
+  both Applications Synced/Healthy; migration Job completed; `/` redirects to
+  ZITADEL's authorize endpoint with PKCE and the right callback. Notes: the
+  migrate PreSync hook crash-loops until the metadata database accepts
+  connections (about 30 s on first sync), then succeeds. The GHCR package came
+  out public on first push (the repo is public), so no visibility change was
+  needed. The image is amd64-only: all nodes are amd64, and the arm64 build
+  ran under QEMU for 18+ minutes.
 - [ ] ZITADEL login → create → RUNNING → connect → delete, end to end
 
 ---
