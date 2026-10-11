@@ -15,7 +15,7 @@ import (
 // controller LISTENs to wake up early; it never depends on it, because
 // notifications are lost while it is disconnected. The periodic scan of
 // next_reconcile_at is the durable path.
-const NotifyChannel = "pgcloud_reconcile"
+const NotifyChannel = "kindergarten_reconcile"
 
 func notify(ctx context.Context, tx pgx.Tx, id uuid.UUID) error {
 	_, err := tx.Exec(ctx, `SELECT pg_notify($1, $2)`, NotifyChannel, id.String())

@@ -1,10 +1,10 @@
 # ── Argo CD ──────────────────────────────────────────────────────────────────
 # One project, two Applications, both rendering only this repo:
 #
-#   pgcloud-data  deploy/manifests  — namespace, metadata database, Vault
+#   kindergarten-data  deploy/manifests  — namespace, metadata database, Vault
 #                 secrets, network policy, the MetalLB pool for databases.
 #                 MANUAL sync: it holds a database.
-#   pgcloud-app   helm/pgcloud      — API + dashboard, controller, migration
+#   kindergarten-app   helm/kindergarten      — API + dashboard, controller, migration
 #                 Job, RBAC. AUTOMATED: the image workflow pins a digest in
 #                 values.homelab.yaml and Argo CD deploys it.
 #
@@ -12,14 +12,14 @@
 # controller and carry no Argo tracking label, so Argo never shows or prunes
 # them.
 
-resource "argocd_project" "pgcloud" {
+resource "argocd_project" "kindergarten" {
   metadata {
-    name      = "homelab-pgcloud"
+    name      = "homelab-kindergarten"
     namespace = "argocd"
   }
 
   spec {
-    description = "pgcloud (github.com/igomez10/kindergarten): self-service PostgreSQL. pgcloud-data (namespace, metadata DB, secrets, DB address pool) and pgcloud-app (API, dashboard, controller)."
+    description = "kindergarten (github.com/igomez10/kindergarten): self-service PostgreSQL. kindergarten-data (namespace, metadata DB, secrets, DB address pool) and kindergarten-app (API, dashboard, controller)."
 
     source_repos = [var.application_repo_url]
 
@@ -57,7 +57,7 @@ resource "argocd_project" "pgcloud" {
   }
 }
 
-resource "argocd_application" "pgcloud_data" {
+resource "argocd_application" "kindergarten_data" {
   # Removing this resource deletes the Application object only — never the
   # database it manages.
   cascade = false
@@ -67,12 +67,12 @@ resource "argocd_application" "pgcloud_data" {
   }
 
   metadata {
-    name      = "pgcloud-data"
+    name      = "kindergarten-data"
     namespace = "argocd"
   }
 
   spec {
-    project = argocd_project.pgcloud.metadata[0].name
+    project = argocd_project.kindergarten.metadata[0].name
 
     source {
       repo_url        = var.application_repo_url
@@ -103,7 +103,7 @@ resource "argocd_application" "pgcloud_data" {
   }
 }
 
-resource "argocd_application" "pgcloud_app" {
+resource "argocd_application" "kindergarten_app" {
   cascade = false
 
   lifecycle {
@@ -111,20 +111,20 @@ resource "argocd_application" "pgcloud_app" {
   }
 
   metadata {
-    name      = "pgcloud-app"
+    name      = "kindergarten-app"
     namespace = "argocd"
   }
 
   spec {
-    project = argocd_project.pgcloud.metadata[0].name
+    project = argocd_project.kindergarten.metadata[0].name
 
     source {
       repo_url        = var.application_repo_url
       target_revision = var.target_revision
-      path            = "helm/pgcloud"
+      path            = "helm/kindergarten"
 
       helm {
-        release_name = "pgcloud"
+        release_name = "kindergarten"
         value_files  = ["values.homelab.yaml"]
         # Hostnames built from var.domain, so the domain never appears in
         # this public repo.

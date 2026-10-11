@@ -3,12 +3,12 @@
 # CloudNativePG cluster of its own, outside every tenant namespace, with a
 # label the controller never selects.
 #
-# The application credentials are CNPG-generated (Secret pgcloud-metadata-app,
+# The application credentials are CNPG-generated (Secret kindergarten-metadata-app,
 # key `uri`), read by the API, controller and migrate Job by secretKeyRef.
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: pgcloud-metadata
+  name: kindergarten-metadata
   namespace: platform-system
 spec:
   instances: 1
@@ -17,8 +17,8 @@ spec:
   enableSuperuserAccess: false
   bootstrap:
     initdb:
-      database: pgcloud
-      owner: pgcloud
+      database: kindergarten
+      owner: kindergarten
   storage:
     size: 5Gi
     storageClass: longhorn

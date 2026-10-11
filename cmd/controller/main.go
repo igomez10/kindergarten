@@ -9,7 +9,7 @@
 //	CONTROLLER_ID   lease owner name, default hostname
 //	METRICS_ADDR    health endpoint address, default :8081
 //	DB_DOMAIN       expose instances as <name>.<DB_DOMAIN> on LoadBalancer IPs; empty = cluster-internal
-//	ADDRESS_POOL    MetalLB pool for those IPs, default pgcloud-db
+//	ADDRESS_POOL    MetalLB pool for those IPs, default kindergarten-db
 //	CLOUDFLARE_API_TOKEN, CLOUDFLARE_ZONE   publish <name>.<DB_DOMAIN> A records; both or neither
 //	TENANT_BOOTSTRAP  "true" (default) creates each organization's namespace, quota and policies
 //	PLATFORM_NAMESPACE  default platform-system; OPERATOR_NAMESPACE default cnpg-system
@@ -94,7 +94,7 @@ func run(logger *slog.Logger) error {
 	opts := postgres.Options{
 		StorageClass: config.Env("STORAGE_CLASS", "longhorn"),
 		DBDomain:     os.Getenv("DB_DOMAIN"),
-		AddressPool:  config.Env("ADDRESS_POOL", "pgcloud-db"),
+		AddressPool:  config.Env("ADDRESS_POOL", "kindergarten-db"),
 	}
 	prov := postgres.New(clients.Dynamic, clients.Kube, checker, dnsProvider, opts)
 	ctrl := controller.New(repository.New(pool), prov, controller.Config{Owner: owner, Workers: workers}, logger)
@@ -103,7 +103,7 @@ func run(logger *slog.Logger) error {
 			PlatformNamespace: config.Env("PLATFORM_NAMESPACE", "platform-system"),
 			OperatorNamespace: config.Env("OPERATOR_NAMESPACE", "cnpg-system"),
 			SecretReaders:     splitList(os.Getenv("TENANT_SECRET_READERS")),
-			SecretReaderRole:  config.Env("TENANT_SECRET_READER_ROLE", "pgcloud-tenant-secrets-reader"),
+			SecretReaderRole:  config.Env("TENANT_SECRET_READER_ROLE", "kindergarten-tenant-secrets-reader"),
 		}))
 	}
 

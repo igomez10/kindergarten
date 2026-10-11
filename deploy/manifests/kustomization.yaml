@@ -1,4 +1,4 @@
-# What the pgcloud-data Argo CD Application syncs (manually): the platform
+# What the kindergarten-data Argo CD Application syncs (manually): the platform
 # namespace, its metadata database, Vault-synced secrets, network policy, and
 # the MetalLB pool managed databases take their addresses from.
 apiVersion: kustomize.config.k8s.io/v1beta1

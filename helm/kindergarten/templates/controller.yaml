@@ -4,29 +4,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pgcloud-controller
+  name: kindergarten-controller
   namespace: {{ .Values.namespace }}
-  labels: {{- include "pgcloud.labels" . | nindent 4 }}
+  labels: {{- include "kindergarten.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: pgcloud-controller
+      app.kubernetes.io/name: kindergarten-controller
   template:
     metadata:
       labels:
-        {{- include "pgcloud.labels" . | nindent 8 }}
-        app.kubernetes.io/name: pgcloud-controller
+        {{- include "kindergarten.labels" . | nindent 8 }}
+        app.kubernetes.io/name: kindergarten-controller
     spec:
-      serviceAccountName: pgcloud-controller
+      serviceAccountName: kindergarten-controller
       enableServiceLinks: false
-      {{- include "pgcloud.podSecurity" . | nindent 6 }}
+      {{- include "kindergarten.podSecurity" . | nindent 6 }}
       containers:
         - name: controller
           image: {{ required "image is required" .Values.image }}
           command: ["/controller"]
           env:
-            {{- include "pgcloud.databaseURL" . | nindent 12 }}
+            {{- include "kindergarten.databaseURL" . | nindent 12 }}
             - name: CONN_CHECK
               value: direct
             - name: STORAGE_CLASS
@@ -38,7 +38,7 @@ spec:
             - name: PLATFORM_NAMESPACE
               value: {{ .Values.namespace }}
             - name: TENANT_SECRET_READERS
-              value: pgcloud-api,pgcloud-controller
+              value: kindergarten-api,kindergarten-controller
             {{- if .Values.dbDomain }}
             - name: DB_DOMAIN
               value: {{ .Values.dbDomain }}
@@ -60,4 +60,4 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 20
           resources: {{- toYaml .Values.resources.controller | nindent 12 }}
-          {{- include "pgcloud.containerSecurity" . | nindent 10 }}
+          {{- include "kindergarten.containerSecurity" . | nindent 10 }}

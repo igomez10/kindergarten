@@ -9,7 +9,7 @@ variable "state_bucket" {
 
 variable "domain" {
   type        = string
-  description = "Base domain. The dashboard is pgcloud.homelab.internal.<domain>; databases are pg-<id>.db.homelab.internal.<domain>."
+  description = "Base domain. The dashboard is kindergarten.homelab.internal.<domain>; databases are pg-<id>.db.homelab.internal.<domain>."
   nullable    = false
 }
 
@@ -44,7 +44,7 @@ variable "zitadel_org_id" {
 
 variable "zitadel_user_ids" {
   type        = set(string)
-  description = "ZITADEL user IDs granted pgcloud-user — who may sign in. Each gets a personal organization on first login."
+  description = "ZITADEL user IDs granted kindergarten-user — who may sign in. Each gets a personal organization on first login."
   default     = []
   nullable    = false
 }

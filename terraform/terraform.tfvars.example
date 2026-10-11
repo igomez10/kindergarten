@@ -1,6 +1,6 @@
 # Copy to terraform.tfvars (gitignored) and fill in.
 state_bucket       = "<gcs bucket with the infrastructure layers' state>"
-domain             = "example.com" # dashboard: pgcloud.homelab.internal.<domain>
+domain             = "example.com" # dashboard: kindergarten.homelab.internal.<domain>
 vault_address      = "https://vault.example.com"
 argocd_server_addr = "argocd.example.com:443"
 zitadel_url        = "https://zitadel.example.com"

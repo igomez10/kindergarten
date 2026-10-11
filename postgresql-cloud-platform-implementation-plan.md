@@ -877,7 +877,7 @@ Design notes added during the build:
 - **Connection check:** `CONN_CHECK=direct` in-cluster (Service DNS), or
   `portforward` on a laptop (a client-go port-forward to the primary pod).
 - **Loop:** claim with `FOR UPDATE SKIP LOCKED` + lease + fencing token (so §4.1
-  is built in already). 4 workers, poll every 2 s, and a `LISTEN pgcloud_reconcile`
+  is built in already). 4 workers, poll every 2 s, and a `LISTEN kindergarten_reconcile`
   wake-up, since the API `pg_notify`s inside the create transaction. Schedule:
   PENDING 0 s, PROVISIONING/STARTING/DELETING 5 s, DEGRADED 10 s, RUNNING 60 s,
   permanent ERROR 5 min. Retryable errors back off 2 s·2ⁿ, capped at 60 s, ±20 %
@@ -1280,19 +1280,19 @@ What was built:
   keep their `100.x` address (k8s-04 does not SNAT subnet-route traffic) and are
   admitted as `world`. A namespace that exists without the
   matching organization label is a permanent ERROR and is never adopted.
-- **Exposure:** a dedicated MetalLB pool `pgcloud-db` (10.0.0.220–.231,
+- **Exposure:** a dedicated MetalLB pool `kindergarten-db` (10.0.0.220–.231,
   `autoAssign: false`, `deploy/manifests/metallb-pool.yaml`; checked unused by
   ARP first). Each Cluster gets `managed.services.additional` with an
   `rw` LoadBalancer Service `<name>-external`, plus
   `certificates.serverAltDNSNames: [<name>.<DB_DOMAIN>]`. CNPG keeps its own CA.
 - **DNS:** the controller publishes `pg-<8hex>.db.homelab.internal.<domain>` A
   records through the Cloudflare API (`internal/dns`). Each record carries the
-  comment `pgcloud:<instance-id>`, and records without it are never touched. On
+  comment `kindergarten:<instance-id>`, and records without it are never touched. On
   delete the record is removed *before* the Cluster. Note: an existing
   `*.internal.<domain>` wildcard means a deleted name still resolves (to the
   tailnet address of that wildcard). TLS verification fails there, as it should.
   Local development reuses cert-manager's DNS-01 token. Phase 6 adds a dedicated
-  token in Vault (`kv/pgcloud/cloudflare`).
+  token in Vault (`kv/kindergarten/cloudflare`).
 - **Readiness** now also requires an LB IP, the DNS record matching it, and a
   `verify-full` TLS login as `app` to `<ip>:5432` with the instance CA and
   hostname. `endpoint_address` (migration 0003) stores the IP.
@@ -1321,7 +1321,7 @@ Verified on the homelab (two dev users, alice and bob):
 | Delete exposed instance | DELETED in 21 s. DNS record, LB Service and IP released |
 
 Tailnet: `layers/10-cloud/modules/tailnet` in microservices-infrastructure
-(branch `pgcloud`) auto-approves `10.0.0.220/30` and
+(branch `kindergarten`) auto-approves `10.0.0.220/30` and
 `10.0.0.224/29`, adds them to k8s-04's approved routes, and adds ACL tests:
 personal devices accept `:5432` on .220/.231, `tag:infra` is denied. **Applied**
 (0 added, 2 changed). On k8s-04 (needs sudo, run by the operator):
@@ -1451,35 +1451,35 @@ What exists:
   `/healthz` and `/readyz` for kubelet probes, since the API itself is loopback-only.
 - **Auth:** an oauth2-proxy sidecar (ZITADEL code flow + PKCE, 12 h cookie)
   sets `X-Forwarded-User` = ZITADEL `sub`. The API runs `AUTH_MODE=proxy` on
-  127.0.0.1. `terraform/zitadel.tf` creates project `pgcloud` with role check,
-  an OIDC web app and role `pgcloud-user`, plus grants from
+  127.0.0.1. `terraform/zitadel.tf` creates project `kindergarten` with role check,
+  an OIDC web app and role `kindergarten-user`, plus grants from
   `var.zitadel_user_ids`. Invite-only; no open registration.
-- **Least-privilege RBAC** (`helm/pgcloud/templates/rbac.yaml`): neither
+- **Least-privilege RBAC** (`helm/kindergarten/templates/rbac.yaml`): neither
   component can read Secrets cluster-wide. Tenant bootstrap binds
-  `pgcloud-tenant-secrets-reader` to both ServiceAccounts inside each tenant
+  `kindergarten-tenant-secrets-reader` to both ServiceAccounts inside each tenant
   namespace, and the controller holds `bind` on that one ClusterRole only.
 - **Packaging:** one distroless image with `/api` (and the dashboard),
   `/controller` and `/migrate` (101 MB). Built locally; CI builds amd64+arm64.
 - **GitOps**, following socialapp's layout: `terraform/` (own state
-  `terraform/state/pgcloud`, providers vault/argocd/zitadel, tokens read
+  `terraform/state/kindergarten`, providers vault/argocd/zitadel, tokens read
   ephemerally from `kv/semaphore/terraform`, domain only in gitignored tfvars),
-  `deploy/manifests` (Argo `pgcloud-data`, manual: namespace, CNPG
-  `pgcloud-metadata`, NetworkPolicies, VSO secrets, the `pgcloud-db` MetalLB
-  pool), `helm/pgcloud` (Argo `pgcloud-app`, automated: API, controller,
+  `deploy/manifests` (Argo `kindergarten-data`, manual: namespace, CNPG
+  `kindergarten-metadata`, NetworkPolicies, VSO secrets, the `kindergarten-db` MetalLB
+  pool), `helm/kindergarten` (Argo `kindergarten-app`, automated: API, controller,
   PreSync migrate Job, RBAC), and `.github/workflows/build-images.yml`
   (test → build → pin digest in `values.homelab.yaml`).
-- **Infra repo**, branch `pgcloud` (uncommitted): dashboard LB `10.0.0.235`,
-  Gateway, VirtualService and Certificate for `pgcloud.homelab.internal.<domain>`,
+- **Infra repo**, branch `kindergarten` (uncommitted): dashboard LB `10.0.0.235`,
+  Gateway, VirtualService and Certificate for `kindergarten.homelab.internal.<domain>`,
   a layer-10 A record, and the tailnet routes from Phase 5 (those are already
   applied).
 - **DNS token decision:** the in-cluster controller reuses cert-manager's
-  DNS-01 Cloudflare token, copied to `kv/pgcloud/cloudflare` (`api_token`,
+  DNS-01 Cloudflare token, copied to `kv/kindergarten/cloudflare` (`api_token`,
   `zone`).
 
 Deployment order once approved: push kindergarten → image built and pinned →
-merge infra `pgcloud` → `terraform apply` layer 10 `-target=module.cloudflare`
+merge infra `kindergarten` → `terraform apply` layer 10 `-target=module.cloudflare`
 → `terraform apply` in `terraform/` → `vault kv put` oidc and cloudflare → sync
-`pgcloud-data` → `pgcloud-app` syncs itself → end-to-end test as a ZITADEL user.
+`kindergarten-data` → `kindergarten-app` syncs itself → end-to-end test as a ZITADEL user.
 
 - [x] Dashboard pages render with live data; cross-tenant ID hidden
 - [x] CSRF, auth-mode and loopback guards tested

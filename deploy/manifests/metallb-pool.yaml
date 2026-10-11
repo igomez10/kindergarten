@@ -9,11 +9,11 @@
 # 10.0.0.220/30 and 10.0.0.224/29 and layer 10's tailnet module approves them.
 #
 # autoAssign: false — only Services that ask for this pool by annotation
-# (metallb.io/address-pool: pgcloud-db, set by the controller) get an address.
+# (metallb.io/address-pool: kindergarten-db, set by the controller) get an address.
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
-  name: pgcloud-db
+  name: kindergarten-db
   namespace: metallb-system
 spec:
   addresses:
@@ -23,8 +23,8 @@ spec:
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
 metadata:
-  name: pgcloud-db
+  name: kindergarten-db
   namespace: metallb-system
 spec:
   ipAddressPools:
-    - pgcloud-db
+    - kindergarten-db

@@ -1,4 +1,4 @@
-# pgcloud's own Terraform root: the objects that describe how pgcloud deploys
+# kindergarten's own Terraform root: the objects that describe how kindergarten deploys
 # — its ZITADEL login, its Vault policy, its Argo CD Applications — kept in
 # the repo that holds its code, like igomez10/microservices' socialapp and
 # urlshortener roots.
@@ -28,6 +28,6 @@ terraform {
   #   terraform init -backend-config=backend.gcs.tfbackend
   backend "gcs" {
     bucket = "set-in-backend-gcs-tfbackend"
-    prefix = "terraform/state/pgcloud"
+    prefix = "terraform/state/kindergarten"
   }
 }

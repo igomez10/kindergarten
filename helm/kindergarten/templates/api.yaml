@@ -4,28 +4,28 @@
 #
 # /api listens on the pod's loopback (AUTH_MODE=proxy refuses anything else),
 # so oauth2-proxy is the only way in and the identity headers it sets cannot
-# be forged. ZITADEL refuses the login for anyone without the pgcloud-user
+# be forged. ZITADEL refuses the login for anyone without the kindergarten-user
 # role (terraform/zitadel.tf).
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pgcloud-api
+  name: kindergarten-api
   namespace: {{ .Values.namespace }}
-  labels: {{- include "pgcloud.labels" . | nindent 4 }}
+  labels: {{- include "kindergarten.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: pgcloud-api
+      app.kubernetes.io/name: kindergarten-api
   template:
     metadata:
       labels:
-        {{- include "pgcloud.labels" . | nindent 8 }}
-        app.kubernetes.io/name: pgcloud-api
+        {{- include "kindergarten.labels" . | nindent 8 }}
+        app.kubernetes.io/name: kindergarten-api
     spec:
-      serviceAccountName: pgcloud-api
+      serviceAccountName: kindergarten-api
       enableServiceLinks: false
-      {{- include "pgcloud.podSecurity" . | nindent 6 }}
+      {{- include "kindergarten.podSecurity" . | nindent 6 }}
       containers:
         - name: oauth2-proxy
           image: {{ .Values.oauth2Proxy.image }}
@@ -40,7 +40,7 @@ spec:
             # Who may sign in is ZITADEL's project role check, not email domain.
             - --email-domain=*
             - --skip-provider-button=true
-            - --cookie-name=_pgcloud_session
+            - --cookie-name=_kindergarten_session
             - --cookie-secure=true
             - --cookie-samesite=lax
             - --cookie-expire=12h
@@ -68,12 +68,12 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 20
           resources: {{- toYaml .Values.resources.proxy | nindent 12 }}
-          {{- include "pgcloud.containerSecurity" . | nindent 10 }}
+          {{- include "kindergarten.containerSecurity" . | nindent 10 }}
         - name: api
           image: {{ required "image is required" .Values.image }}
           command: ["/api"]
           env:
-            {{- include "pgcloud.databaseURL" . | nindent 12 }}
+            {{- include "kindergarten.databaseURL" . | nindent 12 }}
             - name: LISTEN_ADDR
               value: 127.0.0.1:8080
             - name: HEALTH_ADDR
@@ -93,18 +93,18 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 20
           resources: {{- toYaml .Values.resources.api | nindent 12 }}
-          {{- include "pgcloud.containerSecurity" . | nindent 10 }}
+          {{- include "kindergarten.containerSecurity" . | nindent 10 }}
 ---
 # Points at oauth2-proxy, never at the API directly.
 apiVersion: v1
 kind: Service
 metadata:
-  name: pgcloud
+  name: kindergarten
   namespace: {{ .Values.namespace }}
-  labels: {{- include "pgcloud.labels" . | nindent 4 }}
+  labels: {{- include "kindergarten.labels" . | nindent 4 }}
 spec:
   selector:
-    app.kubernetes.io/name: pgcloud-api
+    app.kubernetes.io/name: kindergarten-api
   ports:
     - name: http
       port: 80

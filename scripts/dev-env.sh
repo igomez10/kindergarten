@@ -12,7 +12,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 [ -f scripts/dev.env ] && set -a && . scripts/dev.env && set +a
-export DATABASE_URL="${DATABASE_URL:-postgres://postgres:postgres@127.0.0.1:55432/pgcloud?sslmode=disable}"
+export DATABASE_URL="${DATABASE_URL:-postgres://postgres:postgres@127.0.0.1:55432/kindergarten?sslmode=disable}"
 export KUBECONFIG="${KUBECONFIG:-$HOME/.kube/homelab}"
 what=$1; shift
 case "$what" in

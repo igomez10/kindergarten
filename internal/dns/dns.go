@@ -41,7 +41,7 @@ func NewCloudflare(token, zone string) *Cloudflare {
 	return &Cloudflare{Token: token, Zone: zone, HTTP: &http.Client{Timeout: 15 * time.Second}}
 }
 
-func ownerComment(owner string) string { return "pgcloud:" + owner }
+func ownerComment(owner string) string { return "kindergarten:" + owner }
 
 type cfRecord struct {
 	ID      string `json:"id,omitempty"`

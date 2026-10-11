@@ -149,7 +149,7 @@ func (b *Bootstrapper) Objects(org domain.Organization) []*unstructured.Unstruct
 		for _, sa := range b.opts.SecretReaders {
 			subjects = append(subjects, map[string]any{"kind": "ServiceAccount", "name": sa, "namespace": b.opts.PlatformNamespace})
 		}
-		objs = append(objs, obj("rbac.authorization.k8s.io/v1", "RoleBinding", "pgcloud-secret-readers", ns, map[string]any{
+		objs = append(objs, obj("rbac.authorization.k8s.io/v1", "RoleBinding", "kindergarten-secret-readers", ns, map[string]any{
 			"roleRef":  map[string]any{"apiGroup": "rbac.authorization.k8s.io", "kind": "ClusterRole", "name": b.opts.SecretReaderRole},
 			"subjects": subjects,
 		}))

@@ -13,7 +13,7 @@ func TestObjects(t *testing.T) {
 	org := domain.Organization{ID: uuid.MustParse("a4b87944-1c4b-4aa2-b765-a2037d78fbd1"), K8sNamespace: "tenant-a4b87944",
 		MaxInstances: 2, MaxCPUMillis: 1000, MaxMemoryMiB: 2048, MaxStorageGiB: 20}
 	objs := New(nil, Options{PlatformNamespace: "platform-system", OperatorNamespace: "cnpg-system",
-		SecretReaders: []string{"pgcloud-api", "pgcloud-controller"}, SecretReaderRole: "pgcloud-tenant-secrets-reader"}).Objects(org)
+		SecretReaders: []string{"kindergarten-api", "kindergarten-controller"}, SecretReaderRole: "kindergarten-tenant-secrets-reader"}).Objects(org)
 	byKind := map[string]*unstructured.Unstructured{}
 	for _, o := range objs {
 		byKind[o.GetKind()+"/"+o.GetName()] = o
@@ -22,7 +22,7 @@ func TestObjects(t *testing.T) {
 		}
 	}
 	ns := byKind["Namespace/tenant-a4b87944"]
-	if ns.GetLabels()["pod-security.kubernetes.io/enforce"] != "restricted" || ns.GetLabels()["pgcloud.igomez10.github.io/organization-id"] != org.ID.String() {
+	if ns.GetLabels()["pod-security.kubernetes.io/enforce"] != "restricted" || ns.GetLabels()["kindergarten.igomez10.github.io/organization-id"] != org.ID.String() {
 		t.Errorf("namespace labels %v", ns.GetLabels())
 	}
 	hard, _, _ := unstructured.NestedStringMap(byKind["ResourceQuota/tenant-quota"].Object, "spec", "hard")
@@ -31,7 +31,7 @@ func TestObjects(t *testing.T) {
 			t.Errorf("quota %s = %q, want %q", k, hard[k], want)
 		}
 	}
-	subjects, _, _ := unstructured.NestedSlice(byKind["RoleBinding/pgcloud-secret-readers"].Object, "subjects")
+	subjects, _, _ := unstructured.NestedSlice(byKind["RoleBinding/kindergarten-secret-readers"].Object, "subjects")
 	if len(subjects) != 2 || subjects[0].(map[string]any)["namespace"] != "platform-system" {
 		t.Errorf("rolebinding subjects %v", subjects)
 	}

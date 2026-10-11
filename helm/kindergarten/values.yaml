@@ -7,20 +7,20 @@ image: ""
 
 namespace: platform-system
 
-# Public hostname of the dashboard, e.g. pgcloud.homelab.internal.example.com.
+# Public hostname of the dashboard, e.g. kindergarten.homelab.internal.example.com.
 host: ""
 # OIDC issuer (ZITADEL), e.g. https://zitadel.example.com.
 oidcIssuer: ""
 # Managed databases are published as pg-<id>.<dbDomain>; empty keeps them
 # cluster-internal.
 dbDomain: ""
-addressPool: pgcloud-db
+addressPool: kindergarten-db
 storageClass: longhorn
 
-# Secrets created by the pgcloud-data Application (deploy/manifests).
-metadataDBSecret: pgcloud-metadata-app
-oidcSecret: pgcloud-oidc
-cloudflareSecret: pgcloud-cloudflare
+# Secrets created by the kindergarten-data Application (deploy/manifests).
+metadataDBSecret: kindergarten-metadata-app
+oidcSecret: kindergarten-oidc
+cloudflareSecret: kindergarten-cloudflare
 
 oauth2Proxy:
   image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.5@sha256:8498b0d0ef0a7b29686414000a08aee467f02d0299c9ed1e006a8f33fc017916

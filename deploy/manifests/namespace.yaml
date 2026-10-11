@@ -5,7 +5,7 @@ kind: Namespace
 metadata:
   name: platform-system
   labels:
-    app.kubernetes.io/part-of: pgcloud
+    app.kubernetes.io/part-of: kindergarten
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/warn: restricted

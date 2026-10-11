@@ -16,7 +16,7 @@ export default function Header() {
   return (
     <header className="topbar">
       <Link href="/instances" className="brand">
-        <span className="brand-mark" aria-hidden>◆</span> pgcloud
+        <span className="brand-mark" aria-hidden>◆</span> kindergarten
       </Link>
       <nav>
         {link("/instances", "Databases")}

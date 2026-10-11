@@ -4,7 +4,7 @@ import Providers from "./providers";
 import Header from "./header";
 
 export const metadata: Metadata = {
-  title: "pgcloud",
+  title: "kindergarten",
   description: "Self-service PostgreSQL on the homelab",
 };
 

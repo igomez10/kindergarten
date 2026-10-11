@@ -133,7 +133,7 @@ func TestPVCBelongsTo(t *testing.T) {
 }
 
 func TestBuildClusterExposed(t *testing.T) {
-	u, err := BuildCluster(inst("nano", "17", 5), Options{StorageClass: "longhorn", DBDomain: "db.example.internal", AddressPool: "pgcloud-db"})
+	u, err := BuildCluster(inst("nano", "17", 5), Options{StorageClass: "longhorn", DBDomain: "db.example.internal", AddressPool: "kindergarten-db"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -146,7 +146,7 @@ func TestBuildClusterExposed(t *testing.T) {
 	tmpl := svc["serviceTemplate"].(map[string]any)
 	if svc["selectorType"] != "rw" ||
 		tmpl["metadata"].(map[string]any)["name"] != "pg-7d8f2b6c-external" ||
-		tmpl["metadata"].(map[string]any)["annotations"].(map[string]any)["metallb.io/address-pool"] != "pgcloud-db" ||
+		tmpl["metadata"].(map[string]any)["annotations"].(map[string]any)["metallb.io/address-pool"] != "kindergarten-db" ||
 		tmpl["spec"].(map[string]any)["type"] != "LoadBalancer" ||
 		tmpl["spec"].(map[string]any)["externalTrafficPolicy"] != "Local" {
 		t.Errorf("external service %v", svc)

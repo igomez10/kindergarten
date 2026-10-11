@@ -1,8 +1,8 @@
-# Tests, builds ghcr.io/<owner>/pgcloud (one image: /api, /controller,
-# /migrate, dashboard), and pins its digest in helm/pgcloud/values.homelab.yaml,
-# which Argo CD's pgcloud-app deploys. Same loop as socialapp's image workflow
+# Tests, builds ghcr.io/<owner>/kindergarten (one image: /api, /controller,
+# /migrate, dashboard), and pins its digest in helm/kindergarten/values.homelab.yaml,
+# which Argo CD's kindergarten-app deploys. Same loop as socialapp's image workflow
 # in igomez10/microservices.
-name: pgcloud image
+name: kindergarten image
 
 on:
   push:
@@ -20,7 +20,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE: ghcr.io/${{ github.repository_owner }}/pgcloud
+  IMAGE: ghcr.io/${{ github.repository_owner }}/kindergarten
 
 jobs:
   test:
@@ -41,7 +41,7 @@ jobs:
       - run: go vet ./...
       - run: go test -race -count=1 ./...
         env:
-          PGCLOUD_TEST_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable
+          KINDERGARTEN_TEST_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/postgres?sslmode=disable
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -87,7 +87,7 @@ jobs:
     permissions:
       contents: write
     concurrency:
-      group: pgcloud-promote
+      group: kindergarten-promote
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
@@ -98,14 +98,14 @@ jobs:
           DIGEST: ${{ needs.build.outputs.digest }}
         run: |
           set -euo pipefail
-          VALUES=helm/pgcloud/values.homelab.yaml
-          sed -i -E "s|(ghcr.io/[^/]+/pgcloud)@sha256:[a-f0-9]+|\1@${DIGEST}|" "$VALUES"
+          VALUES=helm/kindergarten/values.homelab.yaml
+          sed -i -E "s|(ghcr.io/[^/]+/kindergarten)@sha256:[a-f0-9]+|\1@${DIGEST}|" "$VALUES"
           if git diff --quiet; then
             echo "already pinned"; exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "$VALUES"
-          git commit -m "deploy(pgcloud): ${GITHUB_SHA:0:12}" -m "Built from ${GITHUB_SHA}"
+          git commit -m "deploy(kindergarten): ${GITHUB_SHA:0:12}" -m "Built from ${GITHUB_SHA}"
           git pull --rebase origin main
           git push origin HEAD:main

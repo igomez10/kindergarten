@@ -1,6 +1,6 @@
-TEST_DB_CONTAINER ?= pgcloud-test-db
+TEST_DB_CONTAINER ?= kindergarten-test-db
 TEST_DB_PORT      ?= 55432
-export PGCLOUD_TEST_DATABASE_URL ?= postgres://postgres:postgres@127.0.0.1:$(TEST_DB_PORT)/postgres?sslmode=disable
+export KINDERGARTEN_TEST_DATABASE_URL ?= postgres://postgres:postgres@127.0.0.1:$(TEST_DB_PORT)/postgres?sslmode=disable
 
 .PHONY: build test test-db test-db-stop fmt vet
 

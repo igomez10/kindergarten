@@ -11,13 +11,13 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      cnpg.io/cluster: pgcloud-metadata
+      cnpg.io/cluster: kindergarten-metadata
   policyTypes: [Ingress]
   ingress:
     - from:
         - podSelector:
             matchLabels:
-              app.kubernetes.io/part-of: pgcloud
+              app.kubernetes.io/part-of: kindergarten
       ports:
         - protocol: TCP
           port: 5432
@@ -29,7 +29,7 @@ spec:
     - from:
         - podSelector:
             matchLabels:
-              cnpg.io/cluster: pgcloud-metadata
+              cnpg.io/cluster: kindergarten-metadata
 ---
 # The dashboard/API pod: only the Istio gateway, and only to oauth2-proxy.
 # The API itself listens on the pod's loopback.
@@ -41,7 +41,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: pgcloud-api
+      app.kubernetes.io/name: kindergarten-api
   policyTypes: [Ingress]
   ingress:
     - from:
@@ -62,6 +62,6 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: pgcloud-controller
+      app.kubernetes.io/name: kindergarten-controller
   policyTypes: [Ingress]
   ingress: []

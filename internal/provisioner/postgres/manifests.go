@@ -13,7 +13,7 @@ import (
 // Ownership labels. Every object the platform creates carries them, and a
 // Cluster without the matching instance ID is never modified.
 const (
-	LabelPrefix       = "pgcloud.igomez10.github.io/"
+	LabelPrefix       = "kindergarten.igomez10.github.io/"
 	LabelManaged      = LabelPrefix + "managed"
 	LabelInstanceID   = LabelPrefix + "instance-id"
 	LabelOrganization = LabelPrefix + "organization-id"

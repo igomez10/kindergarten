@@ -3,9 +3,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: pgcloud-migrate
+  name: kindergarten-migrate
   namespace: {{ .Values.namespace }}
-  labels: {{- include "pgcloud.labels" . | nindent 4 }}
+  labels: {{- include "kindergarten.labels" . | nindent 4 }}
   annotations:
     argocd.argoproj.io/hook: PreSync
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
@@ -15,16 +15,16 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "pgcloud.labels" . | nindent 8 }}
-        app.kubernetes.io/name: pgcloud-migrate
+        {{- include "kindergarten.labels" . | nindent 8 }}
+        app.kubernetes.io/name: kindergarten-migrate
     spec:
       restartPolicy: OnFailure
       automountServiceAccountToken: false
-      {{- include "pgcloud.podSecurity" . | nindent 6 }}
+      {{- include "kindergarten.podSecurity" . | nindent 6 }}
       containers:
         - name: migrate
           image: {{ required "image is required" .Values.image }}
           command: ["/migrate"]
-          env: {{- include "pgcloud.databaseURL" . | nindent 12 }}
-          {{- include "pgcloud.containerSecurity" . | nindent 10 }}
+          env: {{- include "kindergarten.databaseURL" . | nindent 12 }}
+          {{- include "kindergarten.containerSecurity" . | nindent 10 }}
           resources: {requests: {cpu: 10m, memory: 32Mi}, limits: {memory: 128Mi}}

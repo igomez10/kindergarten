@@ -1,9 +1,9 @@
-{{- define "pgcloud.labels" -}}
-app.kubernetes.io/part-of: pgcloud
+{{- define "kindergarten.labels" -}}
+app.kubernetes.io/part-of: kindergarten
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
-{{- define "pgcloud.podSecurity" -}}
+{{- define "kindergarten.podSecurity" -}}
 securityContext:
   runAsNonRoot: true
   runAsUser: 65532
@@ -12,7 +12,7 @@ securityContext:
     type: RuntimeDefault
 {{- end -}}
 
-{{- define "pgcloud.containerSecurity" -}}
+{{- define "kindergarten.containerSecurity" -}}
 securityContext:
   allowPrivilegeEscalation: false
   readOnlyRootFilesystem: true
@@ -20,7 +20,7 @@ securityContext:
     drop: ["ALL"]
 {{- end -}}
 
-{{- define "pgcloud.databaseURL" -}}
+{{- define "kindergarten.databaseURL" -}}
 - name: DATABASE_URL
   valueFrom:
     secretKeyRef: {name: {{ .Values.metadataDBSecret }}, key: uri}
