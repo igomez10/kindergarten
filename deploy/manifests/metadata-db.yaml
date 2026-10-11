@@ -1,0 +1,32 @@
+# The platform metadata database: users, organizations, instances and their
+# desired state. Losing it loses who owns which database, so it is a
+# CloudNativePG cluster of its own, outside every tenant namespace, with a
+# label the controller never selects.
+#
+# The application credentials are CNPG-generated (Secret kindergarten-metadata-app,
+# key `uri`), read by the API, controller and migrate Job by secretKeyRef.
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: kindergarten-metadata
+  namespace: platform-system
+spec:
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.10-system-trixie
+  primaryUpdateStrategy: unsupervised
+  enableSuperuserAccess: false
+  bootstrap:
+    initdb:
+      database: kindergarten
+      owner: kindergarten
+  storage:
+    size: 5Gi
+    storageClass: longhorn
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+  monitoring:
+    enablePodMonitor: false

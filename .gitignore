@@ -1,0 +1,11 @@
+terraform/.terraform/
+*.tfstate*
+*.tfvars
+!*.tfvars.example
+*.tfbackend
+!*.tfbackend.example
+node_modules/
+.next/
+apps/web/out/
+/bin/
+scripts/dev.env

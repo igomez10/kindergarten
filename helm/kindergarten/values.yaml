@@ -1,0 +1,40 @@
+# Defaults. values.homelab.yaml holds the cluster-specific values and the image
+# digest; hostnames come from Terraform (terraform/argocd.tf) as inline values
+# so the domain stays out of this public repo.
+
+# One image runs every component (/api, /controller, /migrate).
+image: ""
+
+namespace: platform-system
+
+# Public hostname of the dashboard, e.g. kindergarten.homelab.internal.example.com.
+host: ""
+# OIDC issuer (ZITADEL), e.g. https://zitadel.example.com.
+oidcIssuer: ""
+# Managed databases are published as pg-<id>.<dbDomain>; empty keeps them
+# cluster-internal.
+dbDomain: ""
+addressPool: kindergarten-db
+storageClass: longhorn
+
+# Secrets created by the kindergarten-data Application (deploy/manifests).
+metadataDBSecret: kindergarten-metadata-app
+oidcSecret: kindergarten-oidc
+cloudflareSecret: kindergarten-cloudflare
+
+oauth2Proxy:
+  image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.5@sha256:8498b0d0ef0a7b29686414000a08aee467f02d0299c9ed1e006a8f33fc017916
+
+controller:
+  workers: 4
+
+resources:
+  api:
+    requests: {cpu: 20m, memory: 64Mi}
+    limits: {memory: 256Mi}
+  controller:
+    requests: {cpu: 20m, memory: 64Mi}
+    limits: {memory: 256Mi}
+  proxy:
+    requests: {cpu: 5m, memory: 32Mi}
+    limits: {memory: 128Mi}

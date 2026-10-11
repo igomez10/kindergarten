@@ -1,0 +1,8 @@
+# Copy to terraform.tfvars (gitignored) and fill in.
+state_bucket       = "<gcs bucket with the infrastructure layers' state>"
+domain             = "example.com" # dashboard: kindergarten.homelab.internal.<domain>
+vault_address      = "https://vault.example.com"
+argocd_server_addr = "argocd.example.com:443"
+zitadel_url        = "https://zitadel.example.com"
+zitadel_org_id     = "<zitadel organization id>"
+zitadel_user_ids   = ["<zitadel user id>"]

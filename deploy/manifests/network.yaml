@@ -1,0 +1,67 @@
+# Who may talk to what in platform-system.
+#
+# The metadata database admits the platform's own pods and the CNPG operator,
+# nothing else — in particular no tenant database pod (tenant namespaces also
+# deny all egress except DNS and the API server; see internal/tenant).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: metadata-db-ingress
+  namespace: platform-system
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: kindergarten-metadata
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/part-of: kindergarten
+      ports:
+        - protocol: TCP
+          port: 5432
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+    # Instance pods of the same cluster (replicas, jobs).
+    - from:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: kindergarten-metadata
+---
+# The dashboard/API pod: only the Istio gateway, and only to oauth2-proxy.
+# The API itself listens on the pod's loopback.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-ingress
+  namespace: platform-system
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kindergarten-api
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-ingress
+      ports:
+        - protocol: TCP
+          port: 4180
+---
+# The controller accepts nothing; probes come from the kubelet (host), which
+# NetworkPolicy does not restrict.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: controller-ingress
+  namespace: platform-system
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: kindergarten-controller
+  policyTypes: [Ingress]
+  ingress: []

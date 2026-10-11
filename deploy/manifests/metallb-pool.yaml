@@ -1,0 +1,30 @@
+# LoadBalancer addresses for managed databases, one per instance, separate
+# from the homelab's lan-pool so a burst of databases can never take an
+# address an admin UI needs.
+#
+# 10.0.0.220-.231 is inside the block the router keeps out of dynamic DHCP
+# (10.0.0.220-.250; see lan-pool in microservices-infrastructure,
+# homelab/kubernetes/post-helm/metallb-lan-pool.yaml), and below lan-pool's
+# .232-.250. Reachable from the tailnet only once k8s-04 advertises
+# 10.0.0.220/30 and 10.0.0.224/29 and layer 10's tailnet module approves them.
+#
+# autoAssign: false — only Services that ask for this pool by annotation
+# (metallb.io/address-pool: kindergarten-db, set by the controller) get an address.
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: kindergarten-db
+  namespace: metallb-system
+spec:
+  addresses:
+    - 10.0.0.220-10.0.0.231
+  autoAssign: false
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: kindergarten-db
+  namespace: metallb-system
+spec:
+  ipAddressPools:
+    - kindergarten-db
