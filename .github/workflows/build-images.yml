@@ -1,4 +1,4 @@
-# Tests, builds ghcr.io/<owner>/kindergarten (one image: /api, /controller,
+# Tests, builds ghcr.io/<owner>/kindergarten (one amd64 image: /api, /controller,
 # /migrate, dashboard), and pins its digest in helm/kindergarten/values.homelab.yaml,
 # which Argo CD's kindergarten-app deploys. Same loop as socialapp's image workflow
 # in igomez10/microservices.
@@ -75,8 +75,9 @@ jobs:
         with:
           context: .
           push: true
-          # amd64 for the homelab nodes; arm64 for Apple Silicon laptops.
-          platforms: linux/amd64,linux/arm64
+          # The homelab nodes are all amd64. arm64 would be built under QEMU
+          # emulation for no consumer.
+          platforms: linux/amd64
           tags: |
             ${{ env.IMAGE }}:main
             ${{ env.IMAGE }}:${{ github.sha }}

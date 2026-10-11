@@ -9,3 +9,4 @@ node_modules/
 apps/web/out/
 /bin/
 scripts/dev.env
+*.tsbuildinfo

@@ -1,5 +1,5 @@
 # One image for every platform component: /api (serves the dashboard too),
-# /controller and /migrate. Pinned bases; built multi-arch by
+# /controller and /migrate. Pinned bases; built for amd64 by
 # .github/workflows/build-images.yml.
 
 FROM node:24.10-alpine3.22 AS web
