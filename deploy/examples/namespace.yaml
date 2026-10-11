@@ -1,0 +1,9 @@
+# Same Pod Security labels as every app namespace in the homelab.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: platform-test
+  labels:
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

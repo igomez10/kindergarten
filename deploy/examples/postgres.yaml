@@ -1,0 +1,39 @@
+# Phase 1 smoke test: one CloudNativePG Cluster created by hand, before any
+# platform code exists. Same shape the reconciler will generate later
+# (internal/provisioner/postgres/manifests.go), on the cluster's real
+# StorageClass. See docs/infrastructure.md.
+#
+#   kubectl apply -f deploy/examples/namespace.yaml -f deploy/examples/postgres.yaml
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: test-postgres
+  namespace: platform-test
+spec:
+  instances: 1
+
+  # Pinned operand image instead of the operator's default.
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.10-system-trixie
+
+  # Managed instances never get a superuser; the user only receives the app
+  # role's credentials.
+  enableSuperuserAccess: false
+
+  bootstrap:
+    initdb:
+      database: app
+      owner: app
+
+  storage:
+    size: 5Gi
+    storageClass: longhorn
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+
+  monitoring:
+    enablePodMonitor: false

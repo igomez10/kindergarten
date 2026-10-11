@@ -1,0 +1,5 @@
+# Homelab values, layered over values.yaml. The image workflow
+# (.github/workflows/build-images.yml) rewrites the image digest below on each
+# build; helm/** is excluded from that workflow's trigger, so the commit cannot
+# start another build.
+image: ghcr.io/igomez10/pgcloud@sha256:0000000000000000000000000000000000000000000000000000000000000000

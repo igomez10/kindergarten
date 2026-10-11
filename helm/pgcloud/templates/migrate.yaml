@@ -1,0 +1,30 @@
+# Applies the metadata schema before every sync. Idempotent: applied versions
+# are recorded in schema_migrations, and an advisory lock serializes runs.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pgcloud-migrate
+  namespace: {{ .Values.namespace }}
+  labels: {{- include "pgcloud.labels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        {{- include "pgcloud.labels" . | nindent 8 }}
+        app.kubernetes.io/name: pgcloud-migrate
+    spec:
+      restartPolicy: OnFailure
+      automountServiceAccountToken: false
+      {{- include "pgcloud.podSecurity" . | nindent 6 }}
+      containers:
+        - name: migrate
+          image: {{ required "image is required" .Values.image }}
+          command: ["/migrate"]
+          env: {{- include "pgcloud.databaseURL" . | nindent 12 }}
+          {{- include "pgcloud.containerSecurity" . | nindent 10 }}
+          resources: {requests: {cpu: 10m, memory: 32Mi}, limits: {memory: 128Mi}}

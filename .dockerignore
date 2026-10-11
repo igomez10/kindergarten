@@ -1,0 +1,10 @@
+.git
+bin
+apps/web/node_modules
+apps/web/.next
+apps/web/out
+terraform
+deploy
+helm
+docs
+*.md

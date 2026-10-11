@@ -1,0 +1,11 @@
+# The platform's own namespace: API, controller and the metadata database.
+# Never a tenant namespace, and never touched by the controller.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: platform-system
+  labels:
+    app.kubernetes.io/part-of: pgcloud
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
