@@ -2,4 +2,4 @@
 # (.github/workflows/build-images.yml) rewrites the image digest below on each
 # build; helm/** is excluded from that workflow's trigger, so the commit cannot
 # start another build.
-image: ghcr.io/igomez10/kindergarten@sha256:3fc730ad6eb634708696086053ddb0ecab135e173acdc624e1a92df5f3e67bad
+image: ghcr.io/igomez10/kindergarten@sha256:49f8c5cac0fe9e8058d777178f44ffa47790663e9e854bc797e9feddb3d7c877
