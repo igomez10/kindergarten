@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
@@ -185,7 +186,7 @@ func (p *Provisioner) Observe(ctx context.Context, inst domain.Instance) (provis
 				return provisioner.ObservedState{}, fmt.Errorf("get ca secret: %w", err)
 			}
 			f.ExternalTried = true
-			f.ExternalErr = p.checker.CheckExternal(ctx, f.ExternalIP+":5432", host, ca.Data["ca.crt"], user, password)
+			f.ExternalErr = p.checker.CheckExternal(ctx, net.JoinHostPort(f.ExternalIP, "5432"), host, ca.Data["ca.crt"], user, password)
 		}
 	}
 

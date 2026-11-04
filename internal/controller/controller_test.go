@@ -297,9 +297,17 @@ func TestBackoffBounds(t *testing.T) {
 	for n := 1; n <= 20; n++ {
 		for range 50 {
 			d := controller.Backoff(n)
-			if d < 1600*time.Millisecond || d > 60*time.Second {
+			if d < 1600*time.Millisecond || d > 72*time.Second {
 				t.Fatalf("Backoff(%d) = %v", n, d)
 			}
 		}
+	}
+	// Capped retries must still be jittered.
+	seen := map[time.Duration]bool{}
+	for range 20 {
+		seen[controller.Backoff(20)] = true
+	}
+	if len(seen) < 2 {
+		t.Fatalf("Backoff(20) is not jittered: %v", seen)
 	}
 }

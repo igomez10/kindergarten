@@ -159,12 +159,12 @@ func Schedule(status string) time.Duration {
 }
 
 // Backoff is the retry delay after the n-th consecutive retryable failure:
-// exponential from 2s with ±20 % jitter, capped at 60s so a fleet of
-// failing instances does not retry in lockstep.
+// exponential from 2s, capped at 60s, then ±20 % jitter so a fleet of
+// failing instances does not retry in lockstep (jitter after the cap, or
+// every capped retry would land on exactly 60s).
 func Backoff(n int) time.Duration {
-	d := 2 * time.Second * time.Duration(math.Pow(2, float64(min(n, 10)-1)))
-	d = time.Duration(float64(d) * (0.8 + 0.4*rand.Float64()))
-	return min(d, 60*time.Second)
+	d := min(2*time.Second*time.Duration(math.Pow(2, float64(min(n, 10)-1))), 60*time.Second)
+	return time.Duration(float64(d) * (0.8 + 0.4*rand.Float64()))
 }
 
 const retryMessage = "A temporary infrastructure error occurred. The platform will retry automatically."
@@ -179,6 +179,16 @@ func (c *Controller) Reconcile(ctx context.Context, inst domain.Instance) {
 
 	start := time.Now()
 	out, err := c.step(rctx, inst)
+	sctx, scancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+	defer scancel()
+	if err != nil && ctx.Err() != nil {
+		// Shutting down, not an infrastructure failure: hand the instance
+		// back untouched instead of recording an error the user would see.
+		if err := c.repo.ReleaseLease(sctx, inst); err != nil {
+			log.Error("release lease", "err", err)
+		}
+		return
+	}
 	if err != nil {
 		out = c.failure(inst, err)
 		if provisioner.IsPermanent(err) {
@@ -188,9 +198,7 @@ func (c *Controller) Reconcile(ctx context.Context, inst domain.Instance) {
 		}
 	}
 
-	// Write with a fresh context: a timed-out step must still record why.
-	sctx, scancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
-	defer scancel()
+	// Write with a fresh context (sctx): a timed-out step must still record why.
 	saved, err := c.repo.SaveOutcome(sctx, inst, out)
 	switch {
 	case err != nil:
