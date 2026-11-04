@@ -181,9 +181,10 @@ func (c *Controller) Reconcile(ctx context.Context, inst domain.Instance) {
 	out, err := c.step(rctx, inst)
 	sctx, scancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 	defer scancel()
-	if err != nil && ctx.Err() != nil {
-		// Shutting down, not an infrastructure failure: hand the instance
-		// back untouched instead of recording an error the user would see.
+	if ctx.Err() != nil {
+		// Shutting down: whatever step saw (an error, or a probe cut short
+		// and reported as not ready) says nothing about the instance. Hand it
+		// back untouched instead of recording a status the user would see.
 		if err := c.repo.ReleaseLease(sctx, inst); err != nil {
 			log.Error("release lease", "err", err)
 		}

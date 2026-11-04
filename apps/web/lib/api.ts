@@ -84,7 +84,7 @@ async function request<T>(method: string, path: string, body?: unknown, headers:
     if (res.ok) throw new ApiError(res.status, "invalid_response", "The server sent an unexpected response.");
   }
   if (!res.ok) {
-    throw new ApiError(res.status, data?.error?.code ?? "error", data?.error?.message ?? res.statusText);
+    throw new ApiError(res.status, data?.error?.code ?? "error", data?.error?.message ?? (res.statusText || `Request failed (HTTP ${res.status})`));
   }
   return data as T;
 }
