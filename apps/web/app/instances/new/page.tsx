@@ -14,9 +14,11 @@ export default function NewInstancePage() {
   const [name, setName] = useState("");
   const [plan, setPlan] = useState("nano");
   const [version, setVersion] = useState("");
-  // One key per form: a double click or a retried request after a network
-  // error cannot create a second database.
-  const idempotencyKey = useMemo(() => crypto.randomUUID(), []);
+  // One key per distinct request: a double click or a retry after a network
+  // error cannot create a second database, while editing the form after an
+  // error (name taken, quota) gets a fresh key instead of idempotency_conflict.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const idempotencyKey = useMemo(() => crypto.randomUUID(), [name, plan, version]);
 
   const create = useMutation({
     mutationFn: () => api.create({ name, plan, postgres_version: version || plans.data!.default_postgres_version }, idempotencyKey),

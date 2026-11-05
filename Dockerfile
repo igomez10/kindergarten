@@ -9,7 +9,7 @@ RUN npm ci --no-audit --no-fund
 COPY apps/web/ ./
 RUN npm run build
 
-FROM golang:1 AS go
+FROM golang:1.27 AS go
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download

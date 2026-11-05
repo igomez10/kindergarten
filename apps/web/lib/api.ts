@@ -76,9 +76,15 @@ async function request<T>(method: string, path: string, body?: unknown, headers:
     throw new ApiError(401, "unauthenticated", "Signing in again…");
   }
   const text = await res.text();
-  const data = text ? JSON.parse(text) : null;
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    // A gateway or proxy error page (HTML) rather than the API's JSON.
+    if (res.ok) throw new ApiError(res.status, "invalid_response", "The server sent an unexpected response.");
+  }
   if (!res.ok) {
-    throw new ApiError(res.status, data?.error?.code ?? "error", data?.error?.message ?? res.statusText);
+    throw new ApiError(res.status, data?.error?.code ?? "error", data?.error?.message ?? (res.statusText || `Request failed (HTTP ${res.status})`));
   }
   return data as T;
 }

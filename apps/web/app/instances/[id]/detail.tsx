@@ -29,7 +29,8 @@ function download(name: string, text: string) {
   a.href = url;
   a.download = name;
   a.click();
-  URL.revokeObjectURL(url);
+  // Revoking synchronously can cancel the download before it starts in some browsers.
+  setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
 const STEPS = ["PENDING", "PROVISIONING", "STARTING", "RUNNING"];

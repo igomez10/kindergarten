@@ -219,6 +219,10 @@ func (s *Server) createInstance(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, errorBody{Error: errorDetail{Code: "invalid_request", Message: verr.Message, Field: verr.Field}})
 		return
 	}
+	if err != nil {
+		s.internalError(w, r, err)
+		return
+	}
 	key := r.Header.Get("Idempotency-Key")
 	if len(key) > 200 {
 		writeError(w, http.StatusBadRequest, "invalid_request", "Idempotency-Key is longer than 200 characters")
