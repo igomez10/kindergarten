@@ -219,6 +219,73 @@ func TestRetryableFailureBacksOff(t *testing.T) {
 	}
 }
 
+// runningInstance reconciles a fresh instance to RUNNING and makes it due again.
+func runningInstance(t *testing.T, fx fixture, c *controller.Controller, p *fakeProv) domain.Instance {
+	t.Helper()
+	host, port := "pg.svc", 5432
+	inst := fx.create("db")
+	p.observe = provisioner.ObservedState{Status: domain.StatusRunning, EndpointHost: &host, EndpointPort: &port}
+	c.Reconcile(context.Background(), claimOne(t, fx, "w1"))
+	forceDue(t, fx, inst.ID)
+	return fx.get(inst.ID)
+}
+
+// A shutdown mid-reconcile must leave the instance exactly as it was and hand
+// the lease back at once, whether step failed or merely saw a probe cut short.
+func TestShutdownLeavesInstanceUntouched(t *testing.T) {
+	for name, tc := range map[string]struct {
+		applyErr error
+		observe  provisioner.ObservedState
+	}{
+		"step error":           {applyErr: context.Canceled},
+		"non-ready, nil error": {observe: provisioner.ObservedState{Status: domain.StatusDegraded, Message: "Waiting for the database to accept connections."}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			fx := setup(t)
+			p := &fakeProv{}
+			c := newCtrl(fx, p, "w1")
+			before := runningInstance(t, fx, c, p)
+			opsBefore, _ := fx.repo.ListOperations(context.Background(), before.ID)
+
+			ctx, cancel := context.WithCancel(context.Background())
+			p.applyErr, p.observe, p.duringApply = tc.applyErr, tc.observe, cancel
+			c.Reconcile(ctx, claimOne(t, fx, "w1"))
+
+			got := fx.get(before.ID)
+			if got.ObservedStatus != before.ObservedStatus || got.StatusMessage != nil || got.LastError != nil ||
+				got.ErrorCount != 0 || got.EndpointHost == nil || *got.EndpointHost != *before.EndpointHost || got.LeaseOwner != nil {
+				t.Fatalf("instance changed: before %+v after %+v", before, got)
+			}
+			if opsAfter, _ := fx.repo.ListOperations(context.Background(), before.ID); opsAfter[0].Status != opsBefore[0].Status {
+				t.Errorf("operation %s -> %s", opsBefore[0].Status, opsAfter[0].Status)
+			}
+			claimOne(t, fx, "w2") // reclaimable immediately
+		})
+	}
+}
+
+// blockingProv hangs in Apply until its context ends.
+type blockingProv struct{ fakeProv }
+
+func (b *blockingProv) Apply(ctx context.Context, _ domain.Instance) error {
+	<-ctx.Done()
+	return ctx.Err()
+}
+
+// A reconcile that times out while the controller is still running is a real,
+// retryable failure, unlike a shutdown.
+func TestReconcileTimeoutIsRetryableFailure(t *testing.T) {
+	fx := setup(t)
+	inst := fx.create("db")
+	c := controller.New(fx.repo, &blockingProv{}, controller.Config{Owner: "w1", LeaseDuration: time.Minute, ReconcileTimeout: 50 * time.Millisecond},
+		slog.New(slog.NewTextHandler(io.Discard, nil)))
+	c.Reconcile(context.Background(), claimOne(t, fx, "w1"))
+	got := fx.get(inst.ID)
+	if got.ObservedStatus != domain.StatusProvisioning || got.LastError == nil || got.ErrorCount != 1 || got.LeaseOwner != nil {
+		t.Fatalf("%+v", got)
+	}
+}
+
 func TestPermanentFailure(t *testing.T) {
 	fx := setup(t)
 	inst := fx.create("db")
